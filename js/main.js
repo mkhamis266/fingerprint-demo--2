@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
   });
 });
 
-allFingerprints = [
+const allFingerprints = [
   "./imgs/fingerprints/fb-1.png",
   "./imgs/fingerprints/fb-2.png",
   "./imgs/fingerprints/fb-3.png",
@@ -34,6 +34,13 @@ allFingerprints = [
   "./imgs/fingerprints/fb-24.png",
   "./imgs/fingerprints/fb-25.png",
 ];
+
+const scanSound = new Audio("../sounds/scan.mp3");
+const wrongAnswerSound = new Audio("../sounds/wrong_sir_wrong.mp3");
+const correctAnswerSound = new Audio("../sounds/correct.mp3");
+const clickSound = new Audio("../sounds/mouse_click.mp3");
+const timeoutSound = new Audio("../sounds/game_over_sms.mp3");
+
 let score = 0;
 let timer = 20;
 let attempts = 3;
@@ -68,6 +75,8 @@ function reset() {
   $(".score span").html(score);
   attempts = 3;
   $(".attempts span").html(attempts);
+  timeoutSound.pause();
+  timeoutSound.currentTime = 0;
   $(".popup").hide();
   $("#suspected-img").addClass("opacity-0");
   $(".fingerprint").removeClass("selected");
@@ -107,6 +116,7 @@ function getRandomIndex(range) {
 }
 
 function handleFingerprintClick(element) {
+  clickSound.play();
   $(".fingerprint").removeClass("selected");
   $(element).addClass("selected");
   $("#suspected-img")
@@ -125,6 +135,7 @@ function submit() {
   $(".attempts span").html(attempts);
   scan().then((matched) => {
     if (matched) {
+      correctAnswerSound.play();
       score = Math.round((1 / timer) * 1000);
       $(".score span").html(score);
       endGame("win");
@@ -132,8 +143,9 @@ function submit() {
       if (attempts == 0) {
         endGame("fail");
       } else {
-        $("#wrongPopup").fadeIn(500, function () {
-          $("#wrongPopup").fadeOut(500, function () {
+        wrongAnswerSound.play();
+        $("#wrongPopup").fadeIn(1000, function () {
+          $("#wrongPopup").fadeOut(1000, function () {
             isPaused = false;
           });
         });
@@ -167,16 +179,21 @@ function countDown() {
   // $(".timer span").text(moment(timer * 1000).format("mm [:] ss"));
   $(".timer span").text(timer);
   if (timer <= 0) {
+    timeoutSound.play();
     endGame("timeout");
     return;
   }
 }
 
 function scan() {
+  scanSound.loop = true;
+  scanSound.play();
   $("#scanGif").removeClass("d-none");
   $(".submitButton").attr("disabled", true);
   return new Promise(function (resolve, reject) {
     setTimeout(() => {
+      scanSound.pause();
+      scanSound.currentTime = 0;
       $("#scanGif").addClass("d-none");
       if ($("#suspected-img").attr("data-key") == $(".perpetrator-img-box img").attr("data-key")) {
         resolve(true);
