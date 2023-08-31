@@ -141,6 +141,7 @@ function submit() {
       endGame("win");
     } else {
       if (attempts == 0) {
+        timeoutSound.play();
         endGame("fail");
       } else {
         wrongAnswerSound.play();
